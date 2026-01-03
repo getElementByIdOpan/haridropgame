@@ -2,101 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mini Drop Game</title>
 <style>
-body {
-  margin: 0;
-  background: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+html, body {
+  margin:0; 
+  padding:0;
+  background:#000; 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  min-height:100vh; 
+  flex-direction: column; 
+  font-family:system-ui, sans-serif; 
+  color:#fff; 
+  touch-action: manipulation; /* タップでズーム・スクロールを無効化 */
+  overscroll-behavior: contain; /* スクロールバウンス防止 */
+}
+.game-wrapper{
+  background:#111; 
+  padding:12px; 
+  border-radius:20px; 
+  box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  display:flex;
   flex-direction: column;
-  font-family: system-ui, sans-serif;
-  color: #fff;
+  align-items:center; /* 子要素を中央に */
 }
-.game-wrapper {
-  background: #111;
-  padding: 12px;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* ← canvas を中央に */
+canvas{ 
+  display:block; 
+  background:#000; 
+  border-radius:12px; 
 }
-canvas {
-  display: block;
-  background: #000;
-  border-radius: 12px;
+.controls{ 
+  display:flex; 
+  justify-content:center; 
+  gap:12px; 
+  margin-top:8px;
 }
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 8px;
+button{ cursor:pointer;}
+.control-btn{ 
+  width:64px; height:64px; border-radius:50%; font-size:18px; 
+  background:#222; color:#fff; box-shadow:0 4px 0 #111; transition: transform 0.1s;
 }
-button {
-  cursor: pointer;
-}
-.control-btn {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  font-size: 18px;
-  background: #222;
-  color: #fff;
-  box-shadow: 0 4px 0 #111;
-  transition: transform 0.1s;
-}
-.control-btn:active { transform: translateY(4px); }
-.control-btn.drop { background: #ffb74d; color: #000; }
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #222;
-  color: #fff;
-}
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-.overlay-content {
-  background: #222;
-  color: #fff;
-  padding: 24px;
-  border-radius: 16px;
-  text-align: center;
-  width: 80%;
-  max-width: 300px;
-}
-.primary {
-  background: #ffb74d;
-  color: #000;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 16px;
-}
-.primary:active { transform: translateY(2px); }
+.control-btn:active{ transform:translateY(4px);}
+.control-btn.drop{ background:#ffb74d; color:#000;}
+.icon-btn{ width:32px; height:32px; border-radius:50%; background:#222; color:#fff;}
+.overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:100;}
+.overlay-content{ background:#222; color:#fff; padding:24px; border-radius:16px; text-align:center; width:80%; max-width:300px;}
+.primary{ background:#ffb74d; color:#000; padding:8px 16px; border-radius:8px; font-size:16px;}
+.primary:active{ transform:translateY(2px);}
 </style>
 </head>
 <body>
 
 <div class="game-wrapper">
-  <div class="top-bar">
+  <div class="top-bar" style="width:100%; display:flex; justify-content:space-between;">
     <div>Score: <span id="score">0</span></div>
     <div>⏱ <span id="time">180</span>s
       <button id="pauseBtn" class="icon-btn">⏸</button>
       <button id="restartBtn" class="icon-btn">⟳</button>
     </div>
   </div>
-
   <canvas id="game" width="240" height="480"></canvas>
 
   <div class="controls">
@@ -138,7 +104,7 @@ const pauseBtn=document.getElementById('pauseBtn');
 let grid, currentPair, score, timeLeft, paused=false;
 let gameInterval, timerInterval, dropInterval;
 
-// Load block images
+// --- Load images ---
 const blockImages = [];
 for(let i=0;i<TYPES;i++){
   const img = new Image();
@@ -255,7 +221,8 @@ function checkMatches(){
 // Draw
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  const offsetX = (COLS*BLOCK_SIZE < canvas.width) ? (canvas.width - COLS*BLOCK_SIZE)/2 : 0;
+
+  const offsetX = (canvas.width - COLS * BLOCK_SIZE) / 2; // horizontal center
 
   // Fixed blocks
   for(let y=0;y<ROWS;y++){
@@ -301,6 +268,11 @@ const dropBtn = document.getElementById('dropBtn');
 dropBtn.addEventListener('mousedown', ()=>{ move(0,1); dropInterval=setInterval(()=>move(0,1),50); });
 dropBtn.addEventListener('mouseup', ()=>clearInterval(dropInterval));
 dropBtn.addEventListener('mouseleave', ()=>clearInterval(dropInterval));
+
+// Touch events for mobile
+canvas.addEventListener('touchstart', e => e.preventDefault());
+canvas.addEventListener('touchmove', e => e.preventDefault());
+canvas.addEventListener('touchend', e => e.preventDefault());
 
 // Button controls
 document.getElementById('leftBtn').onclick=()=>move(-1,0);
