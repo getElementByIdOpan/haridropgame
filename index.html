@@ -1,23 +1,89 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mini Drop Game</title>
 <style>
-body { margin:0; background:#000; display:flex; justify-content:center; align-items:center; min-height:100vh; flex-direction: column; font-family:system-ui, sans-serif; color:#fff; }
-.game-wrapper{ background:#111; padding:12px; border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.5);}
-canvas{ display:block; background:#000; border-radius:12px; }
-.controls{ display:flex; justify-content:center; gap:12px; margin-top:8px;}
-button{ cursor:pointer;}
-.control-btn{ width:64px; height:64px; border-radius:50%; font-size:18px; background:#222; color:#fff; box-shadow:0 4px 0 #111; transition: transform 0.1s;}
-.control-btn:active{ transform:translateY(4px);}
-.control-btn.drop{ background:#ffb74d; color:#000;}
-.icon-btn{ width:32px; height:32px; border-radius:50%; background:#222; color:#fff;}
-.overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:100;}
-.overlay-content{ background:#222; color:#fff; padding:24px; border-radius:16px; text-align:center; width:80%; max-width:300px;}
-.primary{ background:#ffb74d; color:#000; padding:8px 16px; border-radius:8px; font-size:16px;}
-.primary:active{ transform:translateY(2px);}
+body {
+  margin: 0;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  flex-direction: column;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+}
+.game-wrapper {
+  background: #111;
+  padding: 12px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ← canvas を中央に */
+}
+canvas {
+  display: block;
+  background: #000;
+  border-radius: 12px;
+}
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+button {
+  cursor: pointer;
+}
+.control-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  font-size: 18px;
+  background: #222;
+  color: #fff;
+  box-shadow: 0 4px 0 #111;
+  transition: transform 0.1s;
+}
+.control-btn:active { transform: translateY(4px); }
+.control-btn.drop { background: #ffb74d; color: #000; }
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #222;
+  color: #fff;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+.overlay-content {
+  background: #222;
+  color: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  text-align: center;
+  width: 80%;
+  max-width: 300px;
+}
+.primary {
+  background: #ffb74d;
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.primary:active { transform: translateY(2px); }
 </style>
 </head>
 <body>
@@ -30,6 +96,7 @@ button{ cursor:pointer;}
       <button id="restartBtn" class="icon-btn">⟳</button>
     </div>
   </div>
+
   <canvas id="game" width="240" height="480"></canvas>
 
   <div class="controls">
@@ -44,14 +111,14 @@ button{ cursor:pointer;}
   <div class="overlay-content">
     <h2 id="overlayTitle">Game Over</h2>
     <p>Score: <span id="finalScore">0</span></p>
-    <button id="playAgainBtn" class="primary">もう一回プレイ</button>
+    <button id="playAgainBtn" class="primary">Play Again</button>
   </div>
 </div>
 
 <div id="startOverlay" class="overlay">
   <div class="overlay-content">
     <h2>Mini Drop Game</h2>
-    <button id="startBtn" class="primary">ゲーム開始</button>
+    <button id="startBtn" class="primary">Start Game</button>
   </div>
 </div>
 
@@ -71,7 +138,7 @@ const pauseBtn=document.getElementById('pauseBtn');
 let grid, currentPair, score, timeLeft, paused=false;
 let gameInterval, timerInterval, dropInterval;
 
-// --- 画像読み込み ---
+// Load block images
 const blockImages = [];
 for(let i=0;i<TYPES;i++){
   const img = new Image();
@@ -79,7 +146,7 @@ for(let i=0;i<TYPES;i++){
   blockImages.push(img);
 }
 
-// 初期化
+// Initialize game
 function init(){
   grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
   score=0; timeLeft=180; paused=false;
@@ -98,7 +165,7 @@ function init(){
   },1000);
 }
 
-// ペア生成
+// Spawn pair
 function spawnPair(){
   const col = 2;
   const first = randType();
@@ -109,22 +176,22 @@ function spawnPair(){
 
 function randType(){ return Math.floor(Math.random()*TYPES); }
 
-// ペア座標取得（4方向回転対応）
+// Get pair positions
 function getPairPositions(x, y, dir){
   switch(dir){
-    case 0: return [{x:x, y:y}, {x:x, y:y+1}]; // 下
-    case 1: return [{x:x, y:y}, {x:x+1, y:y}]; // 右
-    case 2: return [{x:x, y:y}, {x:x, y:y-1}]; // 上
-    case 3: return [{x:x, y:y}, {x:x-1, y:y}]; // 左
+    case 0: return [{x:x, y:y}, {x:x, y:y+1}]; // down
+    case 1: return [{x:x, y:y}, {x:x+1, y:y}]; // right
+    case 2: return [{x:x, y:y}, {x:x, y:y-1}]; // up
+    case 3: return [{x:x, y:y}, {x:x-1, y:y}]; // left
   }
 }
 
-// 移動可能か
+// Can move?
 function canMove(x,y,dir){
   return getPairPositions(x,y,dir).every(p=>p.x>=0 && p.x<COLS && p.y<ROWS && (p.y<0 || grid[p.y][p.x]===null));
 }
 
-// 移動
+// Move
 function move(dx,dy){
   if(currentPair && canMove(currentPair.x+dx,currentPair.y+dy,currentPair.dir)){
     currentPair.x+=dx; currentPair.y+=dy;
@@ -133,7 +200,7 @@ function move(dx,dy){
   return false;
 }
 
-// 回転（4方向）
+// Rotate
 function rotate(){
   if(!currentPair) return;
   const newDir = (currentPair.dir + 1) % 4;
@@ -142,7 +209,7 @@ function rotate(){
   }
 }
 
-// ペア固定
+// Fix pair
 function fixPair(){
   getPairPositions(currentPair.x,currentPair.y,currentPair.dir).forEach((p,i)=>{
     if(p.y>=0) grid[p.y][p.x] = currentPair.blocks[i];
@@ -150,7 +217,7 @@ function fixPair(){
   currentPair = null;
 }
 
-// 個別落下
+// Individual gravity
 function applyGravityIndividual(){
   for(let x=0;x<COLS;x++){
     for(let y=ROWS-2;y>=0;y--){
@@ -162,7 +229,7 @@ function applyGravityIndividual(){
   }
 }
 
-// マッチ判定
+// Check matches
 function checkMatches(){
   const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
   for(let y=0;y<ROWS;y++){
@@ -185,26 +252,30 @@ function checkMatches(){
   scoreEl.textContent = score;
 }
 
-// 描画
+// Draw
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  // 固定ブロック
+  const offsetX = (COLS*BLOCK_SIZE < canvas.width) ? (canvas.width - COLS*BLOCK_SIZE)/2 : 0;
+
+  // Fixed blocks
   for(let y=0;y<ROWS;y++){
     for(let x=0;x<COLS;x++){
       const t = grid[y][x];
-      if(t!==null && blockImages[t]) ctx.drawImage(blockImages[t], x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+      if(t!==null && blockImages[t]) 
+        ctx.drawImage(blockImages[t], x*BLOCK_SIZE + offsetX, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
     }
   }
-  // 落下中ペア
+
+  // Falling pair
   if(currentPair){
     getPairPositions(currentPair.x,currentPair.y,currentPair.dir).forEach((p,i)=>{
       if(p.y>=0 && blockImages[currentPair.blocks[i]]) 
-        ctx.drawImage(blockImages[currentPair.blocks[i]], p.x*BLOCK_SIZE, p.y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.drawImage(blockImages[currentPair.blocks[i]], p.x*BLOCK_SIZE + offsetX, p.y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
     });
   }
 }
 
-// ゲームループ
+// Game loop
 function gameLoop(){
   if(paused) return;
   if(!move(0,1)){
@@ -216,7 +287,7 @@ function gameLoop(){
   draw();
 }
 
-// 終了
+// End game
 function endGame(title){
   clearInterval(gameInterval);
   clearInterval(timerInterval);
@@ -225,23 +296,23 @@ function endGame(title){
   overlay.style.display='flex';
 }
 
-// 長押し落下
+// Hold drop
 const dropBtn = document.getElementById('dropBtn');
 dropBtn.addEventListener('mousedown', ()=>{ move(0,1); dropInterval=setInterval(()=>move(0,1),50); });
 dropBtn.addEventListener('mouseup', ()=>clearInterval(dropInterval));
 dropBtn.addEventListener('mouseleave', ()=>clearInterval(dropInterval));
 
-// ボタン操作
+// Button controls
 document.getElementById('leftBtn').onclick=()=>move(-1,0);
 document.getElementById('rightBtn').onclick=()=>move(1,0);
 document.getElementById('rotateBtn').onclick=rotate;
 document.getElementById('restartBtn').onclick=init;
 document.getElementById('playAgainBtn').onclick=()=>{ overlay.style.display='none'; init(); };
 
-// 一時停止
+// Pause
 pauseBtn.onclick=()=>{ paused=!paused; pauseBtn.textContent = paused?'▶︎':'⏸'; };
 
-// キーボード操作
+// Keyboard controls
 document.addEventListener('keydown', e=>{
   if(e.key==='ArrowLeft') move(-1,0);
   if(e.key==='ArrowRight') move(1,0);
@@ -249,9 +320,8 @@ document.addEventListener('keydown', e=>{
   if(e.key==='ArrowUp') rotate();
 });
 
-// スタート
+// Start
 startBtn.onclick=()=>{ startOverlay.style.display='none'; init(); };
 </script>
 </body>
 </html>
-
